@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import './App.css'
+// import './App.css'
+import NumPage from './components/NumPage'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-  <h1>name is ravi</h1>
+      <NumPage/>
     </>
   )
 }
