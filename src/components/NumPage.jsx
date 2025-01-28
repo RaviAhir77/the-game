@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import '../css/NumPage.css'
 
+const generatedNum = Math.floor((Math.random() * 100) + 1);
+console.log(generatedNum)
 const NumPage = () => {
 
     const [number,setNumber] = useState(null);
@@ -9,7 +11,6 @@ const NumPage = () => {
     const [alert,setAlert] = useState('guees the Number')
 
 
-    const generatedNum = 20;
     
     const numberHandler = (parameter) => {
         setNumber(parameter)
@@ -27,6 +28,8 @@ const NumPage = () => {
         if(generatedNum === parameter){
             setAlert('You are win🥳🎊🎉')
             setNumber(null)
+            setHighest(101)
+            setLowest(0)
         }
     }
 

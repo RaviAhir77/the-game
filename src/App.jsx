@@ -1,13 +1,13 @@
 import { useState } from 'react'
 // import './App.css'
-import NumPage from './components/NumPage'
+import NumPage from './components/NumPage';
+import IntroPage from './components/IntroPage';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <NumPage/>
+      <IntroPage/>
     </>
   )
 }
