@@ -1,73 +1,95 @@
-import React, { useEffect, useState } from 'react'
-import '../css/NumPage.css'
+import React, { useEffect, useState } from 'react';
+import { db } from '../db/Firebase';
+import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import '../css/NumPage.css';
 
-const generatedNum = Math.floor((Math.random() * 100) + 1);
-console.log(generatedNum)
-const NumPage = () => {
+const NumPage = ({ roomId, playerId }) => {
+    const [number, setNumber] = useState(null);
+    const [lowest, setLowest] = useState(0);
+    const [highest, setHighest] = useState(101);
+    const [alert, setAlert] = useState('Guess the Number');
+    const [gameData, setGameData] = useState(null);
+    const [isMyTurn, setMyTurn] = useState(false);
 
-    const [number,setNumber] = useState(null);
-    const [lowest,setLowest] = useState(0);
-    const [highest,setHighest] = useState(101);
-    const [alert,setAlert] = useState('guees the Number')
+    useEffect(() => {
+        if (!roomId) return;
 
+        const roomRef = doc(db, 'rooms', roomId);
+        const unsubscribe = onSnapshot(roomRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                setGameData(data);
+                setMyTurn(data.turn === playerId);
 
-    
-    const numberHandler = (parameter) => {
-        setNumber(parameter)
+                if (data.winner) {
+                    setAlert(`Player ${data.winner} wins!`);
+                } else if (data.lastGuess) {
+                    setLowest(data.lowest);
+                    setHighest(data.highest);
+                }
+            }
+        });
 
-        if(generatedNum < parameter){
-            setHighest(parameter)
-            setAlert('Select lower Number')
+        return () => unsubscribe();
+    }, [roomId, playerId]);
+
+    const numberHandler = async (guess) => {
+        if (!isMyTurn || !gameData) return;
+
+        const roomRef = doc(db, 'rooms', roomId);
+        const generatedNum = gameData.generatedNumber;
+        let newLowest = lowest;
+        let newHighest = highest;
+        let winner = null;
+
+        if (generatedNum < guess) {
+            newHighest = guess;
+            setAlert('Select a lower number');
+        } else if (generatedNum > guess) {
+            newLowest = guess;
+            setAlert('Select a higher number');
+        } else {
+            winner = playerId;
+            setAlert('You win!');
         }
 
-        if(generatedNum > parameter){
-            setLowest(parameter)
-            setAlert('Select higher Number')
-        }
+        await updateDoc(roomRef, {
+            lastGuess: guess,
+            lowest: newLowest,
+            highest: newHighest,
+            winner: winner,
+            turn: gameData.turn === gameData.player1 ? gameData.player2 : gameData.player1,
+        });
 
-        if(generatedNum === parameter){
-            setAlert('You are win🥳🎊🎉')
-            setNumber(null)
-            setHighest(101)
-            setLowest(0)
-        }
-    }
+        setNumber(null);
+    };
 
-    const numArr = [
-        [1,2,3,4,5,6,7,8,9,10],
-        [11,12,13,14,15,16,17,18,19,20],
-        [21,22,23,24,25,26,27,28,29,30],
-        [31,32,33,34,35,36,37,38,39,40],
-        [41,42,43,44,45,46,47,48,49,50],
-        [51,52,53,54,55,56,57,58,59,60],
-        [61,62,63,64,65,66,67,68,69,70],
-        [71,72,73,74,75,76,77,78,79,80],
-        [81,82,83,84,85,86,87,88,89,90],
-        [91,92,93,94,95,96,97,98,99,100]
-    ]
+    return (
+        <div className='NumPage'>
+            <h1>{alert}</h1>
+            {gameData && !gameData.winner && <h2>{isMyTurn ? 'Your Turn!' : "Opponent's Turn"}</h2>}
 
-  return (
-    <div className='NumPage'>
+            {[...Array(10)].map((_, row) => (
+                <div className='chunks' key={row}>
+                    {[...Array(10)].map((_, col) => {
+                        const num = row * 10 + col + 1;
+                        return (
+                            <button
+                                key={num}
+                                className={`num-button ${num > lowest && num < highest ? 'highlight' : 'normal'}`}
+                                onClick={() => numberHandler(num)}
+                                disabled={!isMyTurn || gameData?.winner}
+                            >
+                                {num}
+                            </button>
+                        );
+                    })}
+                </div>
+            ))}
+            <div>Highest: {highest}</div>
+            <div>Lowest: {lowest}</div>
+        </div>
+    );
+};
 
-        <h1>{alert}</h1>
-        {numArr.map((chunk,index) => (
-            <div className="chunks" key={index}>
-                {chunk.map((num) => (
-                    <div key={num}>
-                        <button className={`num-button ${number && num > lowest && num < highest ? 'highlight' : 'normal'} `} 
-                        value={num} 
-                        onClick={() => numberHandler(num)}>
-                            {num}
-                        </button>
-                    </div>
-                ))}
-            </div>
-        ))}
-
-        <div>higherst : {highest}</div>
-        <div>lowest : {lowest}</div>
-    </div>
-  )
-}
-
-export default NumPage
+export default NumPage;

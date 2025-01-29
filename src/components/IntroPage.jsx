@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { addPlayer, updatePlayer,findOrCreateRoom } from '../routes/Rintro';
+import NumPage from './NumPage';
 
 const IntroPage = () => {
     const [name, setName] = useState('');
@@ -66,7 +67,7 @@ const IntroPage = () => {
 
     return (
         <div className='IntroPage'>
-            <h3>{alert}</h3>
+            {!name &&<h3>{alert}</h3>}
             {!name ? (
                 <>
                     <input type="text" ref={nameRef} placeholder='Enter Name ...' />
@@ -80,7 +81,11 @@ const IntroPage = () => {
             )}
 
             <div className="game-join">
-                <button className='play-with-random' onClick={handleRoom}>Play with Random</button>
+                {!roomId ? (
+                    <button className='play-with-random' onClick={handleRoom}>Play with Random</button>
+                ) : (
+                    <NumPage roomId={roomId} playerId={playerId}/>
+                )}
             </div>
         </div>
     );
