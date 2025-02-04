@@ -1,14 +1,14 @@
 import { db } from '../db/Firebase';
 import { collection, addDoc, serverTimestamp, updateDoc, doc, getDocs, query, where } from 'firebase/firestore';
 
-const connection = collection(db, 'players');
-const roomConnection = collection(db, 'rooms');
+const playersRef = collection(db, 'players');
+const roomsRef = collection(db, 'rooms');
 
 export const addPlayer = async (playerName) => {
     if (!playerName.trim()) return null;
 
     try {
-        const docRef = await addDoc(connection, {
+        const docRef = await addDoc(playersRef, {
             name: playerName,
             status: 'waiting',
             score: 0,
@@ -30,45 +30,53 @@ export const updatePlayer = async (playerId, newName) => {
     }
 };
 
-export const findOrCreateRoom = async (playerId,playerName) => {
+export const findOrCreateRoom = async (playerId, playerName) => {
+    if (!playerId || !playerName) return null;
+
     try {
-        const q = query(roomConnection, where('status', '==', 'waiting'));
-        const querySnapshot = await getDocs(q);
+        // ✅ Step 1: Check if the player is already in an active room
+        const existingRoomQuery = query(roomsRef, where('status', 'in', ['waiting', 'ongoing']), 
+            where('player1', '==', playerId));
+        const existingRoomSnapshot = await getDocs(existingRoomQuery);
 
-        for (let docSnap of querySnapshot.docs) {
-            let roomData = docSnap.data();
+        if (!existingRoomSnapshot.empty) {
+            return existingRoomSnapshot.docs[0].id; // ✅ Return the existing room ID
+        }
 
-            if(roomData.player1 === playerId || roomData.player2 === playerId){
-                return docSnap.id;
-            }
+        // ✅ Step 2: Find an available room with only one player
+        const openRoomQuery = query(roomsRef, where('status', '==', 'waiting'));
+        const openRooms = await getDocs(openRoomQuery);
+
+        for (let room of openRooms.docs) {
+            let roomData = room.data();
 
             if (!roomData.player2) {
-                await updateDoc(doc(db, 'rooms', docSnap.id), {
+                await updateDoc(doc(db, 'rooms', room.id), {
                     player2: playerId,
-                    player2Name : playerName,
+                    player2Name: playerName,
                     status: 'ongoing',
                     generatedNumber: Math.floor(Math.random() * 100) + 1,
                 });
-                return docSnap.id;
+                return room.id;
             }
         }
 
-        const newRoom = await addDoc(roomConnection, {
+        // ✅ Step 3: If no room is available, create a new one
+        const newRoom = await addDoc(roomsRef, {
             player1: playerId,
-            player1Name : playerName,
+            player1Name: playerName,
             player2: null,
-            player2Name : null,
+            player2Name: null,
             turn: playerId,
             status: 'waiting',
-            lowest : 0,
-            highest : 101,
-            winner : null,
+            lowest: 0,
+            highest: 101,
+            winner: null,
             generatedNumber: Math.floor(Math.random() * 100) + 1,
             timeStamp: serverTimestamp(),
         });
 
-        console.log('number generated : ',newRoom.generatedNumber)
-
+        console.log('New room created:', newRoom.id);
         return newRoom.id;
     } catch (error) {
         console.error('Error in findOrCreateRoom:', error);
