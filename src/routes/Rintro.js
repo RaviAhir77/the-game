@@ -37,6 +37,11 @@ export const findOrCreateRoom = async (playerId) => {
 
         for (let docSnap of querySnapshot.docs) {
             let roomData = docSnap.data();
+
+            if(roomData.player1 === playerId || roomData.player2 === playerId){
+                return docSnap.id;
+            }
+
             if (!roomData.player2) {
                 await updateDoc(doc(db, 'rooms', docSnap.id), {
                     player2: playerId,
@@ -52,6 +57,9 @@ export const findOrCreateRoom = async (playerId) => {
             player2: null,
             turn: playerId,
             status: 'waiting',
+            lowest : 0,
+            highest : 101,
+            winner : null,
             generatedNumber: Math.floor(Math.random() * 100) + 1,
             timeStamp: serverTimestamp(),
         });

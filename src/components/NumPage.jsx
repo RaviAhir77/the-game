@@ -44,9 +44,11 @@ const NumPage = ({ roomId, playerId }) => {
 
         if (generatedNum < guess) {
             newHighest = guess;
+            setHighest(guess)
             setAlert('Select a lower number');
         } else if (generatedNum > guess) {
             newLowest = guess;
+            setLowest(guess)
             setAlert('Select a higher number');
         } else {
             winner = playerId;
@@ -54,7 +56,7 @@ const NumPage = ({ roomId, playerId }) => {
         }
 
         await updateDoc(roomRef, {
-            lastGuess: guess,
+            [`playerGuess.${playerId}`]: guess,
             lowest: newLowest,
             highest: newHighest,
             winner: winner,
