@@ -30,7 +30,7 @@ export const updatePlayer = async (playerId, newName) => {
     }
 };
 
-export const findOrCreateRoom = async (playerId) => {
+export const findOrCreateRoom = async (playerId,playerName) => {
     try {
         const q = query(roomConnection, where('status', '==', 'waiting'));
         const querySnapshot = await getDocs(q);
@@ -45,6 +45,7 @@ export const findOrCreateRoom = async (playerId) => {
             if (!roomData.player2) {
                 await updateDoc(doc(db, 'rooms', docSnap.id), {
                     player2: playerId,
+                    player2Name : playerName,
                     status: 'ongoing',
                     generatedNumber: Math.floor(Math.random() * 100) + 1,
                 });
@@ -54,7 +55,9 @@ export const findOrCreateRoom = async (playerId) => {
 
         const newRoom = await addDoc(roomConnection, {
             player1: playerId,
+            player1Name : playerName,
             player2: null,
+            player2Name : null,
             turn: playerId,
             status: 'waiting',
             lowest : 0,

@@ -57,7 +57,7 @@ const IntroPage = () => {
             return
         }
 
-        const room = await findOrCreateRoom(playerId);
+        const room = await findOrCreateRoom(playerId,name);
         if(room){
             setRoomId(room);
             console.log(`joined room : ${room}`)

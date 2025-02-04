@@ -21,8 +21,13 @@ const NumPage = ({ roomId, playerId }) => {
                 setGameData(data);
                 setMyTurn(data.turn === playerId);
 
+                const playerNames = {
+                    [data.player1] : data.player1Name || "player 1",
+                    [data.player2] : data.player2Name || "player 2"
+                }
+
                 if (data.winner) {
-                    setAlert(`Player ${data.winner} wins!`);
+                    setAlert(`${playerNames[data.winner]} wins!`);
                 } else if (data.lastGuess) {
                     setLowest(data.lowest);
                     setHighest(data.highest);
