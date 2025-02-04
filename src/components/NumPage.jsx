@@ -21,8 +21,13 @@ const NumPage = ({ roomId, playerId }) => {
                 setGameData(data);
                 setMyTurn(data.turn === playerId);
 
+                const playerNames = {
+                    [data.player1] : data.player1Name || "player 1",
+                    [data.player2] : data.player2Name || "player 2"
+                }
+
                 if (data.winner) {
-                    setAlert(`Player ${data.winner} wins!`);
+                    setAlert(`${playerNames[data.winner]} wins!`);
                 } else if (data.lastGuess) {
                     setLowest(data.lowest);
                     setHighest(data.highest);
@@ -44,9 +49,11 @@ const NumPage = ({ roomId, playerId }) => {
 
         if (generatedNum < guess) {
             newHighest = guess;
+            setHighest(guess)
             setAlert('Select a lower number');
         } else if (generatedNum > guess) {
             newLowest = guess;
+            setLowest(guess)
             setAlert('Select a higher number');
         } else {
             winner = playerId;
@@ -54,7 +61,7 @@ const NumPage = ({ roomId, playerId }) => {
         }
 
         await updateDoc(roomRef, {
-            lastGuess: guess,
+            [`playerGuess.${playerId}`]: guess,
             lowest: newLowest,
             highest: newHighest,
             winner: winner,
