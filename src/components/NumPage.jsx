@@ -66,6 +66,7 @@ const NumPage = ({ roomId, playerId }) => {
             highest: newHighest,
             winner: winner,
             turn: gameData.turn === gameData.player1 ? gameData.player2 : gameData.player1,
+            ...(winner && {status : 'finished'})
         });
 
         setNumber(null);
