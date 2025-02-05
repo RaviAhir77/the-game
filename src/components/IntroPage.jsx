@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { addPlayer, updatePlayer,findOrCreateRoom } from '../routes/Rintro';
-import NumPage from './NumPage';
+import WaitingScreen from './WaitingScreen';
 
 const IntroPage = () => {
     const [name, setName] = useState('');
@@ -84,7 +84,7 @@ const IntroPage = () => {
                 {!roomId ? (
                     <button className='play-with-random' onClick={handleRoom}>Play with Random</button>
                 ) : (
-                    <NumPage roomId={roomId} playerId={playerId}/>
+                    <WaitingScreen roomId={roomId} playerId={playerId}/>
                 )}
             </div>
         </div>

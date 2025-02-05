@@ -46,6 +46,7 @@ const NumPage = ({ roomId, playerId }) => {
         let newLowest = lowest;
         let newHighest = highest;
         let winner = null;
+        let newStatus = gameData.status;
 
         if (generatedNum < guess) {
             newHighest = guess;
@@ -57,6 +58,7 @@ const NumPage = ({ roomId, playerId }) => {
             setAlert('Select a higher number');
         } else {
             winner = playerId;
+            newStatus = 'finished'
             setAlert('You win!');
         }
 
@@ -66,7 +68,7 @@ const NumPage = ({ roomId, playerId }) => {
             highest: newHighest,
             winner: winner,
             turn: gameData.turn === gameData.player1 ? gameData.player2 : gameData.player1,
-            ...(winner && {status : 'finished'})
+            status : newStatus
         });
 
         setNumber(null);
