@@ -4,7 +4,7 @@ import NumPage from './components/NumPage';
 
 function App() {
   return (
-    <Router>
+    <Router basename='/the-game'>
       <Routes>
         <Route path="/" element={<IntroPage />} />
         <Route path="/game/:roomId/:playerId" element={<NumPage />} />
