@@ -1,15 +1,16 @@
-import { useState } from 'react'
-// import './App.css'
-import NumPage from './components/NumPage';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import IntroPage from './components/IntroPage';
+import NumPage from './components/NumPage';
 
 function App() {
-
   return (
-    <>
-      <IntroPage/>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<IntroPage />} />
+        <Route path="/game/:roomId/:playerId" element={<NumPage />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
